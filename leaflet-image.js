@@ -11,7 +11,7 @@ module.exports = function leafletImage(map, callback) {
     var hasMapbox = !!L.mapbox;
 
     var dimensions = map.getSize(),
-        layerQueue = new queue(1);
+        layerQueue = new queue();
 
     var canvas = document.createElement('canvas');
     canvas.width = dimensions.x;
