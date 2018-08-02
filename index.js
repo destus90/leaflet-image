@@ -10,7 +10,7 @@ module.exports = function leafletImage(map, callback) {
     var hasMapbox = !!L.mapbox;
 
     var dimensions = map.getSize(),
-        layerQueue = new queue(1);
+        layerQueue = new queue();
 
     var canvas = document.createElement('canvas');
     canvas.width = dimensions.x;
@@ -99,7 +99,7 @@ module.exports = function leafletImage(map, callback) {
             bounds.max.divideBy(tileSize)._floor()),
             tiles = [],
             j, i,
-            tileQueue = new queue(1);
+            tileQueue = new queue();
 
         for (j = tileBounds.min.y; j <= tileBounds.max.y; j++) {
             for (i = tileBounds.min.x; i <= tileBounds.max.x; i++) {

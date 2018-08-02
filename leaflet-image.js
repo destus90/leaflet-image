@@ -100,7 +100,7 @@ module.exports = function leafletImage(map, callback) {
             bounds.max.divideBy(tileSize)._floor()),
             tiles = [],
             j, i,
-            tileQueue = new queue(1);
+            tileQueue = new queue();
 
         for (j = tileBounds.min.y; j <= tileBounds.max.y; j++) {
             for (i = tileBounds.min.x; i <= tileBounds.max.x; i++) {
