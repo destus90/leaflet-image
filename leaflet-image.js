@@ -236,6 +236,12 @@ module.exports = function leafletImage(map, callback) {
         canvas.height = dimensions.y;
     
         var ctx = canvas.getContext('2d');
+		
+		if (!dynamicLayer._currentImage) {
+		  callback(null, {
+			canvas: canvas
+		  });
+		};
     
         var im = new Image();
         im.crossOrigin = '';
