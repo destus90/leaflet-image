@@ -85,6 +85,8 @@ module.exports = function leafletImage(map, callback) {
             bounds = map.getPixelBounds(),
             zoom = map.getZoom(),
             tileSize = layer.options.tileSize;
+			
+		ctx.globalAlpha = layer.options.opacity;
 
         if (zoom > layer.options.maxZoom ||
             zoom < layer.options.minZoom ||
