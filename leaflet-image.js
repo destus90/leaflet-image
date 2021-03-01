@@ -31,19 +31,24 @@ module.exports = function leafletImage(map, callback) {
     // tiles, paths, and then markers
     map.eachLayer(drawTileLayer);
     map.eachLayer(drawEsriDynamicLayer);
+    map.eachLayer(drawNonTiledLayer);
     
-    if (map._pathRoot) {
-        layerQueue.defer(handlePathRoot, map._pathRoot);
-    } else if (map._panes) {
-        var firstCanvas = map._panes.overlayPane.getElementsByTagName('canvas').item(0);
-        if (firstCanvas) { layerQueue.defer(handlePathRoot, firstCanvas); }
-    }
+    // if (map._pathRoot) {
+    //     layerQueue.defer(handlePathRoot, map._pathRoot);
+    // } else if (map._panes) {
+    //     var firstCanvas = map._panes.overlayPane.getElementsByTagName('canvas').item(0);
+    //     if (firstCanvas) { layerQueue.defer(handlePathRoot, firstCanvas); }
+    // }
     map.eachLayer(drawMarkerLayer);
     layerQueue.awaitAll(layersDone);
 
     function drawTileLayer(l) {
         if (l instanceof L.TileLayer) layerQueue.defer(handleTileLayer, l);
         else if (l._heat) layerQueue.defer(handlePathRoot, l._canvas);
+    }
+
+    function drawNonTiledLayer(l) {
+        if (l instanceof L.NonTiledLayer) layerQueue.defer(handleNonTiledLayer, l);
     }
 
     function drawMarkerLayer(l) {
@@ -251,6 +256,40 @@ module.exports = function leafletImage(map, callback) {
     
         im.onload = function() {
             ctx.drawImage(im, 0, 0);
+            callback(null, {
+                canvas: canvas
+            });
+        };
+    }
+
+    function handleNonTiledLayer(l, callback) {
+        var imgBounds = l._getClippedBounds(),
+            bounds = new L.Bounds(
+                map.latLngToLayerPoint(imgBounds.getNorthWest()),
+                map.latLngToLayerPoint(imgBounds.getSouthEast())),
+            size = bounds.getSize(),
+            canvas = document.createElement('canvas'),
+            ctx = canvas.getContext('2d');
+
+        canvas.width = dimensions.x;
+        canvas.height = dimensions.y;
+
+        ctx.globalAlpha = l.options.opacity;
+
+        // re-project to corresponding pixel bounds
+        var pix1 = l._map.latLngToContainerPoint(imgBounds.getNorthWest());
+        var pix2 = l._map.latLngToContainerPoint(imgBounds.getSouthEast());
+
+        // get pixel size
+        var width = pix2.x - pix1.x;
+        var height = pix2.y - pix1.y;
+
+        var imageObj = new Image();
+        imageObj.crossOrigin = '';
+        imageObj.src = L.NonTiledLayer.WMS.prototype.getImageUrl.call(l, imgBounds, width, height);
+        imageObj.onload = function () {
+
+            ctx.drawImage(this, 0, 0, size.x, size.y);
             callback(null, {
                 canvas: canvas
             });
