@@ -69,13 +69,16 @@ module.exports = function leafletImage(map, callback) {
     }
 
     function layersDone(err, layers) {
-        if (err) throw err;
-        layers.forEach(function (layer) {
-            if (layer && layer.canvas) {
-                ctx.drawImage(layer.canvas, 0, 0);
-            }
-        });
-        done();
+        if (err) {
+            callback(err);
+        } else {
+            layers.forEach(function (layer) {
+                if (layer && layer.canvas) {
+                    ctx.drawImage(layer.canvas, 0, 0);
+                }
+            });
+            done();
+        }
     }
 
     function handleTileLayer(layer, callback) {
@@ -293,6 +296,9 @@ module.exports = function leafletImage(map, callback) {
                 canvas: canvas
             });
         };
+        imageObj.onerror = function () {
+            callback(new Error(`Error with loading image for ${l.wmsParams.layers}`))
+        }
     }
 
     function addCacheString(url) {
